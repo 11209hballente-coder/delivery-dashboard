@@ -2,78 +2,1690 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport configured for mobile, disables pinch-to-zoom to prevent accidental zooming while tapping -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Delivery Stop Tracker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
-    
-    <!-- Meta tags to make it look like a native app on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            padding-bottom: 120px; /* Space for the huge log button */
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background: #f0f9ff;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Setup Tab */
+        .setup-section {
+            margin-bottom: 24px;
+        }
+
+        .setup-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-field label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .input-field input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+
+        /* Weather Display */
+        .weather-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .weather-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .weather-location {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .weather-temp {
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .weather-condition {
+            font-size: 13px;
+            opacity: 0.95;
+            margin-bottom: 12px;
+        }
+
+        .weather-forecast {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .forecast-item {
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .forecast-temp {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .forecast-rain {
+            opacity: 0.8;
+            font-size: 10px;
+        }
+
+        /* Route Breakdown */
+        .breakdown-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .breakdown-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .breakdown-label {
+            color: #666;
+        }
+
+        .breakdown-value {
+            font-weight: 600;
+            color: #111;
+        }
+
+        .breakdown-percent {
+            font-size: 12px;
+            color: #999;
+            margin-left: 4px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .pill-locker {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .pill-bulk {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .pill-apt {
+            background: #ddd6fe;
+            color: #5b21b6;
+        }
+
+        .pill-multi {
+            background: #ccfbf1;
+            color: #134e4a;
+        }
+
+        .pill-standard {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .complexity-meter {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .complexity-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .complexity-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .complexity-fill {
+            height: 100%;
+            background: #10b981;
+            transition: background-color 0.3s, width 0.3s;
+        }
+
+        .complexity-fill.moderate {
+            background: #f59e0b;
+        }
+
+        .complexity-fill.heavy {
+            background: #ef4444;
+        }
+
+        /* Preview Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric-card {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        /* Shift Tab */
+        .shift-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .shift-timer {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .shift-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            opacity: 0.95;
+        }
+
+        .shift-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .shift-meta-label {
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        .shift-meta-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .shift-summary {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .shift-summary-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .pace-section {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .pace-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .pace-bar {
+            width: 100%;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .pace-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pace-fill.behind {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .pace-fill.critical {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .pace-target-line {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #1e40af;
+            left: 60%;
+            opacity: 0.6;
+        }
+
+        .pace-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .pace-stat {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .pace-stat-value {
+            font-weight: 700;
+            color: #2563eb;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+
+        .pace-stat-label {
+            color: #666;
+            font-size: 11px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Changed to 2 columns for undo and support */
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .control-btn.undo {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .control-btn.undo:active {
+            transform: scale(0.98);
+        }
+
+        .control-btn.support {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .control-btn.support:active {
+            transform: scale(0.98);
+        }
+
+        .control-btn.end {
+            background: #2563eb;
+            color: white;
+            grid-column: 1 / -1;
+        }
+
+        .control-btn.end:hover {
+            background: #1d4ed8;
+        }
+
+        /* MASSIVE BOTTOM FIXED BUTTON */
+        .massive-stop-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 560px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.2s;
+            display: none; /* Only show on shift tab */
+        }
+        .massive-stop-btn.active {
+            display: block;
+        }
+        .massive-stop-btn:active {
+            transform: translateX(-50%) scale(0.98);
+            opacity: 0.9;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stops-log {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .stops-log-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stop-entry {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .stop-entry:last-child {
+            border-bottom: none;
+        }
+
+        .stop-time {
+            font-weight: 600;
+            color: #111;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stop-rate {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Support Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 300px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #111;
+        }
+
+        .input-field.full {
+            margin-bottom: 12px;
+        }
+
+        .input-field.full input {
+            width: 100%;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-buttons .btn {
+            flex: 1;
+        }
+
+        /* History Tab */
+        .history-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .history-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .history-stat {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .history-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2563eb;
+            margin-bottom: 2px;
+        }
+
+        .history-stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .history-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .history-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .history-badge.on-pace {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .history-badge.close {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .history-badge.behind {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .chart-container {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chart-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 120px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: #2563eb;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 4px;
+            transition: all 0.2s;
+        }
+
+        .chart-bar:hover {
+            background: #1d4ed8;
+        }
+
+        .chart-bar.target {
+            background: #e5e7eb;
+            opacity: 0.5;
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                padding-bottom: 120px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pace-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-
-    <header class="app-header">
-        <h1>Stop Tracker</h1>
-        <button id="reset-btn" class="btn-text">Reset Shift</button>
-    </header>
-
-    <main class="dashboard">
-        
-        <!-- Shift Controls -->
-        <section class="shift-controls" id="shift-controls">
-            <button id="start-shift-btn" class="btn-massive btn-start">START SHIFT</button>
-        </section>
-
-        <!-- Active Dashboard (Hidden until shift starts) -->
-        <section class="active-dashboard" id="active-dashboard" style="display: none;">
-            
-            <!-- Metrics Grid -->
-            <div class="metrics-grid">
-                
-                <div class="metric-card highlight">
-                    <div class="metric-label">Stops / Hour</div>
-                    <div class="metric-value" id="pace-display">0.0</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Total Stops</div>
-                    <div class="metric-value" id="total-stops-display">0</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Target Pace</div>
-                    <!-- Simple input so driver can set their own target pace -->
-                    <input type="number" id="target-pace-input" class="metric-value input-metric" value="25" min="1" max="100">
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-label">Shift Time</div>
-                    <div class="metric-value" id="time-display">00:00</div>
-                </div>
-            </div>
-
-            <!-- Big Log Button -->
-            <div class="action-area">
-                <button id="log-stop-btn" class="btn-massive btn-log">
-                    LOG STOP
-                    <span class="tap-hint">Tap when package delivered</span>
-                </button>
-                
-                <button id="end-shift-btn" class="btn-outline">End Shift</button>
-            </div>
-
-        </section>
-        
-        <!-- Break Options (Future Feature Placeholder) -->
-        <div id="break-banner" class="break-banner" style="display: none;">
-            <span>⏸ On Break</span>
-            <button id="end-break-btn" class="btn-small">End Break</button>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="setup">Setup</button>
+            <button class="tab-btn" data-tab="shift">Shift</button>
+            <button class="tab-btn" data-tab="history">History</button>
         </div>
 
-    </main>
+        <!-- Setup Tab -->
+        <div class="tab-content active" id="setup">
+            <div class="setup-section">
+                <h3>Weather</h3>
+                <div class="weather-card" id="weather-card">
+                    <div class="weather-header">
+                        <div>
+                            <div class="weather-location" id="weather-location">Loading...</div>
+                        </div>
+                        <div class="weather-temp" id="weather-temp">--°</div>
+                    </div>
+                    <div class="weather-condition" id="weather-condition">Fetching weather...</div>
+                    <div class="weather-forecast" id="weather-forecast"></div>
+                </div>
+            </div>
 
-    <script src="app.js"></script>
+            <div class="setup-section">
+                <h3>Route Details</h3>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Total Stops</label>
+                        <input type="number" id="totalStops" placeholder="e.g. 120" min="0">
+                    </div>
+                    <div class="input-field">
+                        <label>Total Locations</label>
+                        <input type="number" id="totalLocations" placeholder="e.g. 115" min="0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Total Packages</label>
+                        <input type="number" id="totalPackages" placeholder="e.g. 250" min="0">
+                    </div>
+                    <div class="input-field">
+                        <label>Shift Length (hrs)</label>
+                        <input type="number" id="shiftLength" placeholder="e.g. 8" min="0.5" step="0.5">
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-section">
+                <h3>Stop Types</h3>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Locker Deliveries</label>
+                        <input type="number" id="lockers" placeholder="0" min="0">
+                    </div>
+                    <div class="input-field">
+                        <label>Bulk Drop-offs</label>
+                        <input type="number" id="bulkDropoffs" placeholder="0" min="0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>Apartment Buildings</label>
+                        <input type="number" id="apartments" placeholder="0" min="0">
+                    </div>
+                    <div class="input-field">
+                        <label>Multi-Location Stops</label>
+                        <input type="number" id="multiLocation" placeholder="0" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="breakdown-card">
+                <div class="breakdown-title">Route Breakdown</div>
+                <div id="breakdown-content">
+                    <div style="padding: 20px 0; text-align: center; color: #999;">
+                        Enter your route details above
+                    </div>
+                </div>
+            </div>
+
+            <div class="metrics-grid" id="metrics-grid" style="display: none;">
+                <div class="metric-card">
+                    <div class="metric-value" id="metric-target-rate">--</div>
+                    <div class="metric-label">Target Stops/Hr</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="metric-pkg-per-stop">--</div>
+                    <div class="metric-label">Packages/Stop</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="metric-complex-stops">--</div>
+                    <div class="metric-label">Complex Stops</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="metric-target-min">--</div>
+                    <div class="metric-label">Min/Stop Target</div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="resetSetup()">Clear</button>
+                <button class="btn btn-primary" onclick="startShift()">Start Shift</button>
+            </div>
+        </div>
+
+        <!-- Shift Tab -->
+        <div class="tab-content" id="shift">
+            <div class="shift-header">
+                <div class="shift-timer" id="shift-timer">00:00:00</div>
+                <div class="shift-meta">
+                    <div class="shift-meta-item">
+                        <div class="shift-meta-label">COMPLETED</div>
+                        <div class="shift-meta-value"><span id="shift-completed">0</span> / <span id="shift-total">0</span></div>
+                    </div>
+                    <div class="shift-meta-item">
+                        <div class="shift-meta-label">RATE</div>
+                        <div class="shift-meta-value" id="shift-rate">0.0/hr</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #1e40af;">
+                <strong>Progress:</strong> <span id="progress-pct">0</span>% complete • <span id="stops-remaining">0</span> stops remaining • <strong>ETA:</strong> <span id="eta-time">--</span>
+            </div>
+
+            <div class="shift-summary" id="shift-summary-text"></div>
+
+            <div class="pace-section">
+                <div class="pace-label">Pace vs Target</div>
+                <div class="pace-bar">
+                    <div class="pace-target-line"></div>
+                    <div class="pace-fill" id="pace-fill" style="width: 0%;">
+                        <span id="pace-pct">0%</span>
+                    </div>
+                </div>
+                <div class="pace-stats">
+                    <div class="pace-stat">
+                        <div class="pace-stat-value" id="current-rate">0.0</div>
+                        <div class="pace-stat-label">Current Rate</div>
+                    </div>
+                    <div class="pace-stat">
+                        <div class="pace-stat-value" id="target-rate">0.0</div>
+                        <div class="pace-stat-label">Target Rate</div>
+                    </div>
+                    <div class="pace-stat">
+                        <div class="pace-stat-value" id="avg-gap">--</div>
+                        <div class="pace-stat-label">Avg Gap (min)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <!-- Replaced original log stop button with massive fixed button -->
+                <button class="control-btn undo" onclick="undoStop()">↶ Undo</button>
+                <button class="control-btn support" onclick="openSupportModal()">👥 Rescued</button>
+            </div>
+
+            <div class="break-controls" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px;">
+                <button class="control-btn" id="btn-break-lunch" style="background: #fdf6e3; color: #b58900;" onclick="startBreak('lunch', 30)">🍽️ Lunch</button>
+                <button class="control-btn" id="btn-break-break1" style="background: #e6f7ff; color: #0050b3;" onclick="startBreak('break1', 15)">☕ Break 1</button>
+                <button class="control-btn" id="btn-break-break2" style="background: #e6f7ff; color: #0050b3;" onclick="startBreak('break2', 15)">☕ Break 2</button>
+            </div>
+
+            <button class="control-btn end" onclick="endShift()">End Shift</button>
+
+            <div class="stops-log">
+                <div class="stops-log-header">Stop Log</div>
+                <div id="stops-log-content">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📍</div>
+                        No stops recorded yet. Tap "Log Stop" to start!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content" id="history">
+            <div class="history-controls" style="display: none;">
+                <button class="filter-btn active" onclick="filterHistory('all')">All Time</button>
+                <button class="filter-btn" onclick="filterHistory('week')">This Week</button>
+                <button class="filter-btn" onclick="filterHistory('month')">This Month</button>
+            </div>
+            <div id="history-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    No completed shifts yet. Start a shift and hit "End Shift" to save it!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="modal" id="support-modal">
+        <div class="modal-content">
+            <div class="modal-title">Rescued</div>
+            <p style="font-size: 13px; color: #666; margin-bottom: 16px;">
+                How many stops did they take away?
+            </p>
+            <div class="input-field full">
+                <input type="number" id="support-stops-input" placeholder="e.g. 15" min="0" value="0">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeSupportModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applySupportRemoval()">Remove Stops</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUGE FIXED LOG STOP BUTTON -->
+    <button id="massive-log-stop" class="massive-stop-btn" onclick="addStop()">✓ Stop Delivered</button>
+
+    <script>
+        // State Management
+        const state = {
+            setup: {
+                totalStops: 0,
+                totalLocations: 0,
+                totalPackages: 0,
+                shiftLength: 0,
+                lockers: 0,
+                bulkDropoffs: 0,
+                apartments: 0,
+                multiLocation: 0
+            },
+            shift: {
+                isActive: false,
+                startTime: null,
+                stops: [],
+                supportRemoved: 0,
+                totalBreakTime: 0,
+                activeBreak: null,
+                takenBreaks: []
+            },
+            history: []
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('deliveryTrackerState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.setup = parsed.setup || state.setup;
+                state.history = parsed.history || state.history;
+                if (parsed.shift) {
+                    state.shift = parsed.shift;
+                    if (state.shift.isActive) {
+                        startTimer();
+                        updateShiftDisplay();
+                    }
+                }
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('deliveryTrackerState', JSON.stringify({
+                setup: state.setup,
+                shift: state.shift,
+                history: state.history
+            }));
+        }
+
+        // Initialize app
+        function init() {
+            loadState();
+            attachEventListeners();
+            fetchWeather();
+            renderHistory();
+            updateBreakdown();
+        }
+
+        // Tab switching
+        function attachEventListeners() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    switchTab(tab);
+                });
+            });
+
+            // Setup input listeners
+            ['totalStops', 'totalLocations', 'totalPackages', 'shiftLength', 'lockers', 'bulkDropoffs', 'apartments', 'multiLocation'].forEach(id => {
+                const el = document.getElementById(id);
+                el.value = state.setup[id] || '';
+                el.addEventListener('input', (e) => {
+                    state.setup[id] = parseInt(e.target.value) || 0;
+                    updateBreakdown();
+                    saveState();
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            const massiveBtn = document.getElementById('massive-log-stop');
+            if (tabName === 'shift') {
+                massiveBtn.classList.add('active');
+            } else {
+                massiveBtn.classList.remove('active');
+            }
+
+            if (tabName === 'history') {
+                renderHistory();
+            }
+        }
+
+        // Weather
+        function fetchWeather() {
+            if ("geolocation" in navigator) {
+                document.getElementById('weather-condition').textContent = 'Locating...';
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    try {
+                        const geoResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+                        const geoData = await geoResponse.json();
+                        let locationName = geoData.city ? geoData.city : 'Current Location';
+                        if (geoData.principalSubdivisionCode && geoData.principalSubdivisionCode.includes('-')) {
+                            locationName += ', ' + geoData.principalSubdivisionCode.split('-')[1];
+                        }
+                        
+                        fetchWeatherData(lat, lon, locationName);
+                    } catch (e) {
+                        fetchWeatherData(lat, lon, 'Current Location');
+                    }
+                }, (error) => {
+                    console.log("Geolocation failed", error);
+                    fetchWeatherData(33.9425, -118.0351, 'La Mirada, CA'); // Fallback
+                });
+            } else {
+                fetchWeatherData(33.9425, -118.0351, 'La Mirada, CA'); // Fallback
+            }
+        }
+
+        async function fetchWeatherData(lat, lon, locationName) {
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,precipitation_probability&timezone=auto&forecast_days=5`);
+                const data = await response.json();
+                
+                const current = data.current;
+                document.getElementById('weather-temp').textContent = Math.round(current.temperature_2m) + '°';
+                document.getElementById('weather-location').textContent = locationName;
+                
+                const conditions = {
+                    0: 'Clear', 1: 'Mostly Sunny', 2: 'Partly Cloudy', 3: 'Overcast',
+                    45: 'Foggy', 48: 'Foggy', 51: 'Light Drizzle', 53: 'Moderate Drizzle',
+                    55: 'Dense Drizzle', 61: 'Slight Rain', 63: 'Moderate Rain', 65: 'Heavy Rain',
+                    71: 'Slight Snow', 73: 'Moderate Snow', 75: 'Heavy Snow', 77: 'Snow Grains',
+                    80: 'Slight Showers', 81: 'Showers', 82: 'Heavy Showers',
+                    85: 'Snow Showers', 86: 'Heavy Snow Showers', 95: 'Thunderstorm'
+                };
+                
+                document.getElementById('weather-condition').textContent = conditions[current.weather_code] || 'Clear';
+
+                const daily = data.daily;
+                let forecast = '';
+                
+                const days = ['Today'];
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const todayIdx = new Date().getDay();
+                for (let i = 1; i < 5; i++) {
+                    days.push(dayNames[(todayIdx + i) % 7]);
+                }
+                
+                for (let i = 0; i < 5; i++) {
+                    forecast += `
+                        <div class="forecast-item">
+                            <div>${days[i]}</div>
+                            <div class="forecast-temp">${Math.round(daily.temperature_2m_max[i])}°</div>
+                            <div class="forecast-rain">${daily.precipitation_probability[i]}%</div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('weather-forecast').innerHTML = forecast;
+            } catch (e) {
+                console.error('Weather fetch failed:', e);
+                document.getElementById('weather-condition').textContent = 'Offline';
+            }
+        }
+
+        // Setup Functions
+        function updateBreakdown() {
+            const { totalStops, totalLocations, totalPackages, shiftLength, lockers, bulkDropoffs, apartments, multiLocation } = state.setup;
+            
+            if (!totalStops || !shiftLength) {
+                document.getElementById('breakdown-content').innerHTML = '<div style="padding: 20px 0; text-align: center; color: #999;">Enter your route details above</div>';
+                document.getElementById('metrics-grid').style.display = 'none';
+                return;
+            }
+
+            const standard = totalStops - lockers - bulkDropoffs - apartments - multiLocation;
+            const complex = lockers + bulkDropoffs + apartments + multiLocation;
+            const complexRatio = (complex / totalStops) * 100;
+            const packageLoad = totalPackages / totalStops;
+            
+            let complexity = 'Light';
+            let complexityClass = '';
+            if (complexRatio > 40 || packageLoad > 3) {
+                complexity = 'Heavy';
+                complexityClass = 'heavy';
+            } else if (complexRatio > 25 || packageLoad > 2) {
+                complexity = 'Moderate';
+                complexityClass = 'moderate';
+            }
+
+            const targetRate = (totalStops / shiftLength).toFixed(1);
+            const pkgPerStop = (totalPackages / totalStops).toFixed(1);
+            const targetMin = (60 / targetRate).toFixed(0);
+
+            let breakdown = `
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Standard Stops</span>
+                    <span class="breakdown-value">${standard} <span class="breakdown-percent">(${((standard/totalStops)*100).toFixed(0)}%)</span></span>
+                </div>
+                <div class="breakdown-row">
+                    <span class="breakdown-label">Complex Stops</span>
+                    <span class="breakdown-value">${complex} <span class="breakdown-percent">(${complexRatio.toFixed(0)}%)</span></span>
+                </div>
+            `;
+
+            if (lockers > 0) breakdown += `<span class="pill pill-locker">🔒 Lockers: ${lockers}</span>`;
+            if (bulkDropoffs > 0) breakdown += `<span class="pill pill-bulk">📦 Bulk: ${bulkDropoffs}</span>`;
+            if (apartments > 0) breakdown += `<span class="pill pill-apt">🏢 Apts: ${apartments}</span>`;
+            if (multiLocation > 0) breakdown += `<span class="pill pill-multi">🔗 Multi-Loc: ${multiLocation}</span>`;
+            if (standard > 0) breakdown += `<span class="pill pill-standard">📍 Standard: ${standard}</span>`;
+
+            breakdown += `
+                <div class="complexity-meter">
+                    <div class="complexity-label">
+                        <span>Route Complexity</span>
+                        <strong>${complexity}</strong>
+                    </div>
+                    <div class="complexity-bar">
+                        <div class="complexity-fill ${complexityClass}" style="width: ${Math.min(complexRatio, 100)}%"></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('breakdown-content').innerHTML = breakdown;
+
+            // Update metrics
+            document.getElementById('metric-target-rate').textContent = targetRate;
+            document.getElementById('metric-pkg-per-stop').textContent = pkgPerStop;
+            document.getElementById('metric-complex-stops').textContent = complex;
+            document.getElementById('metric-target-min').textContent = targetMin;
+            document.getElementById('metrics-grid').style.display = 'grid';
+
+            saveState();
+        }
+
+        function resetSetup() {
+            state.setup = {
+                totalStops: 0,
+                totalLocations: 0,
+                totalPackages: 0,
+                shiftLength: 0,
+                lockers: 0,
+                bulkDropoffs: 0,
+                apartments: 0,
+                multiLocation: 0
+            };
+            
+            ['totalStops', 'totalLocations', 'totalPackages', 'shiftLength', 'lockers', 'bulkDropoffs', 'apartments', 'multiLocation'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            
+            updateBreakdown();
+            saveState();
+        }
+
+        function startShift() {
+            if (!state.setup.totalStops || !state.setup.shiftLength) {
+                alert('Please enter route details first');
+                return;
+            }
+            
+            state.shift = {
+                isActive: true,
+                startTime: Date.now(),
+                stops: [],
+                supportRemoved: 0,
+                totalBreakTime: 0,
+                activeBreak: null,
+                takenBreaks: []
+            };
+            
+            saveState();
+            switchTab('shift');
+            updateShiftDisplay();
+            startTimer();
+        }
+
+        // Shift Timer
+        function startTimer() {
+            setInterval(updateShiftDisplay, 1000);
+        }
+
+        function updateShiftDisplay() {
+            if (!state.shift.isActive) return;
+
+            let elapsedSeconds = 0;
+            const now = Date.now();
+            
+            if (state.shift.activeBreak) {
+                elapsedSeconds = (state.shift.activeBreak.startTime - state.shift.startTime - state.shift.totalBreakTime) / 1000;
+                
+                const breakElapsed = now - state.shift.activeBreak.startTime;
+                const breakLeft = (state.shift.activeBreak.durationMin * 60 * 1000) - breakElapsed;
+                const btn = document.getElementById('massive-log-stop');
+                
+                if (breakLeft <= 0) {
+                    btn.textContent = '⚠️ BREAK OVER - END BREAK';
+                    btn.style.background = '#ef4444';
+                    btn.style.color = 'white';
+                    btn.onclick = endBreak;
+                    if (navigator.vibrate && breakLeft > -1500) navigator.vibrate([200, 100, 200]);
+                } else {
+                    const blMin = Math.floor(breakLeft / 60000);
+                    const blSec = Math.floor((breakLeft % 60000) / 1000);
+                    btn.textContent = `⏳ On Break (${String(blMin).padStart(2,'0')}:${String(blSec).padStart(2,'0')})`;
+                    btn.style.background = '#f59e0b';
+                    btn.style.color = 'white';
+                    btn.onclick = endBreak;
+                }
+            } else {
+                elapsedSeconds = (now - state.shift.startTime - state.shift.totalBreakTime) / 1000;
+                const btn = document.getElementById('massive-log-stop');
+                btn.textContent = '✓ Stop Delivered';
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.onclick = addStop;
+            }
+
+            const elapsed = Math.max(0, elapsedSeconds);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = Math.floor(elapsed % 60);
+            
+            const timerStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('shift-timer').textContent = timerStr;
+
+            const elapsedHours = elapsed / 3600;
+            const completed = state.shift.stops.length;
+            const total = state.setup.totalStops;
+            const remaining = Math.max(0, total - completed);
+            const currentRate = (completed / elapsedHours).toFixed(1);
+            const targetRate = (total / state.setup.shiftLength).toFixed(1);
+
+            document.getElementById('shift-completed').textContent = completed;
+            document.getElementById('shift-total').textContent = total;
+            document.getElementById('shift-rate').textContent = currentRate + '/hr';
+            document.getElementById('current-rate').textContent = currentRate;
+            document.getElementById('target-rate').textContent = targetRate;
+
+            // Progress
+            const progressPct = ((completed / total) * 100).toFixed(0);
+            document.getElementById('progress-pct').textContent = progressPct;
+            document.getElementById('stops-remaining').textContent = remaining;
+
+            // ETA
+            if (currentRate > 0) {
+                const timeToFinish = (remaining / currentRate) * 60; // in minutes
+                const finishTime = new Date(Date.now() + timeToFinish * 60000);
+                const eta = finishTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('eta-time').textContent = eta;
+            }
+
+            // Pace
+            const pacePercent = ((currentRate / targetRate) * 100).toFixed(0);
+            const paceFill = document.getElementById('pace-fill');
+            paceFill.style.width = Math.min(pacePercent, 100) + '%';
+            document.getElementById('pace-pct').textContent = pacePercent + '%';
+            
+            paceFill.classList.remove('behind', 'critical');
+            if (pacePercent < 80) {
+                paceFill.classList.add('critical');
+            } else if (pacePercent < 100) {
+                paceFill.classList.add('behind');
+            }
+
+            // Avg gap
+            if (completed > 1) {
+                const firstStop = state.shift.stops[0];
+                const lastStop = state.shift.stops[completed - 1];
+                const timeBetween = (lastStop - firstStop) / (completed - 1) / 1000 / 60;
+                document.getElementById('avg-gap').textContent = timeBetween.toFixed(1);
+            }
+
+            updateSummary();
+            
+            // Update break buttons
+            ['lunch', 'break1', 'break2'].forEach(type => {
+                const btn = document.getElementById(`btn-break-${type}`);
+                if (btn) {
+                    if (state.shift.takenBreaks.includes(type) || state.shift.activeBreak) {
+                        btn.style.opacity = '0.5';
+                        btn.style.pointerEvents = 'none';
+                    } else {
+                        btn.style.opacity = '1';
+                        btn.style.pointerEvents = 'auto';
+                    }
+                }
+            });
+        }
+
+        function startBreak(type, durationMin) {
+            if (!state.shift.isActive || state.shift.activeBreak) return;
+            state.shift.activeBreak = { type, startTime: Date.now(), durationMin };
+            saveState();
+            updateShiftDisplay();
+        }
+
+        function endBreak() {
+            if (!state.shift.activeBreak) return;
+            const elapsed = Date.now() - state.shift.activeBreak.startTime;
+            state.shift.totalBreakTime += elapsed;
+            state.shift.takenBreaks.push(state.shift.activeBreak.type);
+            state.shift.activeBreak = null;
+            saveState();
+            updateShiftDisplay();
+        }
+
+        function updateSummary() {
+            const completed = state.shift.stops.length;
+            const lockers = state.setup.lockers;
+            const bulk = state.setup.bulkDropoffs;
+            const apts = state.setup.apartments;
+            const multi = state.setup.multiLocation;
+            
+            let summary = `<strong>${completed}/${state.setup.totalStops}</strong> completed`;
+            let pills = '';
+
+            if (lockers > 0) pills += `<span class="pill pill-locker">🔒 ${lockers}</span>`;
+            if (bulk > 0) pills += `<span class="pill pill-bulk">📦 ${bulk}</span>`;
+            if (apts > 0) pills += `<span class="pill pill-apt">🏢 ${apts}</span>`;
+            if (multi > 0) pills += `<span class="pill pill-multi">🔗 ${multi}</span>`;
+
+            if (pills) {
+                document.getElementById('shift-summary-text').innerHTML = summary + `<div class="shift-summary-pills">${pills}</div>`;
+            } else {
+                document.getElementById('shift-summary-text').innerHTML = summary;
+            }
+        }
+
+        function addStop() {
+            if (!state.shift.isActive) return;
+            state.shift.stops.push(Date.now());
+            saveState();
+            updateShiftDisplay();
+            renderStopLog();
+            
+            // Provide haptic feedback if supported!
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        function undoStop() {
+            if (state.shift.stops.length === 0) return;
+            state.shift.stops.pop();
+            saveState();
+            updateShiftDisplay();
+            renderStopLog();
+        }
+
+        function renderStopLog() {
+            const log = document.getElementById('stops-log-content');
+            if (state.shift.stops.length === 0) {
+                log.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📍</div>
+                        No stops recorded yet. Tap "Log Stop" to start!
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            const startTime = state.shift.startTime;
+            
+            state.shift.stops.forEach((stopTime, idx) => {
+                const elapsed = (stopTime - startTime) / 1000;
+                const elapsedHours = elapsed / 3600;
+                const rate = ((idx + 1) / elapsedHours).toFixed(1);
+                const time = new Date(stopTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                
+                html += `
+                    <div class="stop-entry">
+                        <div>
+                            <div class="stop-time">#${idx + 1} @ ${time}</div>
+                        </div>
+                        <div class="stop-rate">${rate}/hr</div>
+                    </div>
+                `;
+            });
+
+            log.innerHTML = html;
+        }
+
+        function openSupportModal() {
+            document.getElementById('support-modal').classList.add('active');
+            document.getElementById('support-stops-input').value = '';
+            document.getElementById('support-stops-input').focus();
+        }
+
+        function closeSupportModal() {
+            document.getElementById('support-modal').classList.remove('active');
+        }
+
+        function applySupportRemoval() {
+            const removed = parseInt(document.getElementById('support-stops-input').value) || 0;
+            if (removed <= 0) {
+                closeSupportModal();
+                return;
+            }
+            
+            state.shift.supportRemoved += removed;
+            const newTotal = state.setup.totalStops - state.shift.supportRemoved;
+            document.getElementById('shift-total').textContent = newTotal;
+            
+            saveState();
+            closeSupportModal();
+            updateShiftDisplay();
+        }
+
+        function endShift() {
+            if (!state.shift.isActive) return;
+            
+            const finalStops = state.shift.stops.length;
+            const finalTotal = state.setup.totalStops - state.shift.supportRemoved;
+            let elapsed = (Date.now() - state.shift.startTime - state.shift.totalBreakTime) / 1000 / 3600;
+            if (state.shift.activeBreak) {
+                // If they end shift while on break, subtract the active break time too
+                elapsed -= (Date.now() - state.shift.activeBreak.startTime) / 1000 / 3600;
+            }
+            const rate = (finalStops / elapsed).toFixed(1);
+            const targetRate = (finalTotal / state.setup.shiftLength).toFixed(1);
+            
+            let badge = 'on-pace';
+            if (rate < targetRate * 0.95) badge = 'behind';
+            else if (rate < targetRate * 1.05) badge = 'close';
+
+            const shiftRecord = {
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                stops: finalStops,
+                hours: elapsed.toFixed(1),
+                rate: rate,
+                targetRate: targetRate,
+                badge: badge,
+                totalStops: finalTotal,
+                supportRemoved: state.shift.supportRemoved,
+                lockers: state.setup.lockers,
+                bulk: state.setup.bulkDropoffs,
+                apts: state.setup.apartments,
+                multi: state.setup.multiLocation
+            };
+
+            state.history.unshift(shiftRecord);
+            state.shift.isActive = false;
+            
+            saveState();
+            switchTab('history');
+            renderHistory();
+
+            alert(`Shift ended!\n${finalStops} stops in ${elapsed.toFixed(1)}h = ${rate}/hr\n(Target: ${targetRate}/hr)`);
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-content');
+            
+            if (state.history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📊</div>
+                        No completed shifts yet. Start a shift and hit "End Shift" to save it!
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let chartHtml = '<div class="chart-container"><div class="chart-title">Last 7 Shifts</div><div class="chart-bars">';
+            
+            const recentShifts = state.history.slice(0, 7).reverse();
+            const maxRate = Math.max(...state.history.map(s => parseFloat(s.rate)));
+
+            recentShifts.forEach(shift => {
+                const barHeight = (parseFloat(shift.rate) / maxRate) * 100;
+                const targetHeight = (parseFloat(shift.targetRate) / maxRate) * 100;
+                chartHtml += `<div class="chart-bar" style="height: ${barHeight}%" title="${shift.rate}/hr"></div>`;
+            });
+
+            chartHtml += '</div></div>';
+
+            state.history.forEach(shift => {
+                let pills = '';
+                if (shift.lockers > 0) pills += `<span class="pill pill-locker">🔒 ${shift.lockers}</span>`;
+                if (shift.bulk > 0) pills += `<span class="pill pill-bulk">📦 ${shift.bulk}</span>`;
+                if (shift.apts > 0) pills += `<span class="pill pill-apt">🏢 ${shift.apts}</span>`;
+                if (shift.multi > 0) pills += `<span class="pill pill-multi">🔗 ${shift.multi}</span>`;
+                if (shift.supportRemoved > 0) pills += `<span class="pill" style="background: #fef2f2; color: #991b1b;">👥 -${shift.supportRemoved}</span>`;
+
+                html += `
+                    <div class="history-item">
+                        <div class="history-date">${shift.date}</div>
+                        <div class="history-stats">
+                            <div class="history-stat">
+                                <div class="history-stat-value">${shift.stops}</div>
+                                <div class="history-stat-label">Stops</div>
+                            </div>
+                            <div class="history-stat">
+                                <div class="history-stat-value">${shift.rate}</div>
+                                <div class="history-stat-label">Rate/Hr</div>
+                            </div>
+                            <div class="history-stat">
+                                <div class="history-stat-value">${shift.hours}h</div>
+                                <div class="history-stat-label">Duration</div>
+                            </div>
+                            <div class="history-stat">
+                                <div class="history-stat-value">${shift.targetRate}</div>
+                                <div class="history-stat-label">Target/Hr</div>
+                            </div>
+                        </div>
+                        ${pills ? `<div class="history-pills">${pills}</div>` : ''}
+                        <span class="history-badge history-badge-${shift.badge}">${shift.badge === 'on-pace' ? '✓ On Pace' : shift.badge === 'close' ? '≈ Close' : '✗ Behind'}</span>
+                    </div>
+                `;
+            });
+
+            html = chartHtml + html;
+            container.innerHTML = html;
+        }
+
+        // Start app
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
