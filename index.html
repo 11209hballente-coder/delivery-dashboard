@@ -1013,7 +1013,7 @@
                 <div id="stops-log-content">
                     <div class="empty-state">
                         <div class="empty-state-icon">📍</div>
-                        No stops recorded yet. Tap "Log Stop" to start!
+                        No stops recorded yet. Tap "Stop Delivered" to log each stop!
                     </div>
                 </div>
             </div>
@@ -1186,7 +1186,7 @@
 
         async function fetchWeatherData(lat, lon, locationName) {
             try {
-                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,precipitation_probability&timezone=auto&forecast_days=5`);
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,precipitation_probability_max&timezone=auto&forecast_days=5`);
                 const data = await response.json();
                 
                 const current = data.current;
@@ -1219,7 +1219,7 @@
                         <div class="forecast-item">
                             <div>${days[i]}</div>
                             <div class="forecast-temp">${Math.round(daily.temperature_2m_max[i])}°</div>
-                            <div class="forecast-rain">${daily.precipitation_probability[i]}%</div>
+                            <div class="forecast-rain">${daily.precipitation_probability_max[i]}%</div>
                         </div>
                     `;
                 }
@@ -1340,6 +1340,7 @@
             saveState();
             switchTab('shift');
             updateShiftDisplay();
+            renderStopLog();
             startTimer();
         }
 
@@ -1522,7 +1523,7 @@
                 log.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📍</div>
-                        No stops recorded yet. Tap "Log Stop" to start!
+                        No stops recorded yet. Tap "Stop Delivered" to log each stop!
                     </div>
                 `;
                 return;
@@ -1614,6 +1615,21 @@
             saveState();
             switchTab('history');
             renderHistory();
+            
+            // Clear shift UI for next time
+            document.getElementById('shift-timer').textContent = '00:00:00';
+            document.getElementById('shift-completed').textContent = '0';
+            document.getElementById('progress-pct').textContent = '0';
+            document.getElementById('stops-remaining').textContent = '0';
+            document.getElementById('shift-summary-text').innerHTML = '';
+            document.getElementById('pace-fill').style.width = '0%';
+            document.getElementById('pace-pct').textContent = '0%';
+            document.getElementById('stops-log-content').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    No stops recorded yet. Tap "Stop Delivered" to log each stop!
+                </div>
+            `;
 
             alert(`Shift ended!\n${finalStops} stops in ${elapsed.toFixed(1)}h = ${rate}/hr\n(Target: ${targetRate}/hr)`);
         }
