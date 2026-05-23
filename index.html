@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Viewport configured for mobile, disables pinch-to-zoom to prevent accidental zooming while tapping -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delivery Stop Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Meta tags to make it look like a native app on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>Stop Tracker</h1>
+        <button id="reset-btn" class="btn-text">Reset Shift</button>
+    </header>
+
+    <main class="dashboard">
+        
+        <!-- Shift Controls -->
+        <section class="shift-controls" id="shift-controls">
+            <button id="start-shift-btn" class="btn-massive btn-start">START SHIFT</button>
+        </section>
+
+        <!-- Active Dashboard (Hidden until shift starts) -->
+        <section class="active-dashboard" id="active-dashboard" style="display: none;">
+            
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                
+                <div class="metric-card highlight">
+                    <div class="metric-label">Stops / Hour</div>
+                    <div class="metric-value" id="pace-display">0.0</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">Total Stops</div>
+                    <div class="metric-value" id="total-stops-display">0</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">Target Pace</div>
+                    <!-- Simple input so driver can set their own target pace -->
+                    <input type="number" id="target-pace-input" class="metric-value input-metric" value="25" min="1" max="100">
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">Shift Time</div>
+                    <div class="metric-value" id="time-display">00:00</div>
+                </div>
+            </div>
+
+            <!-- Big Log Button -->
+            <div class="action-area">
+                <button id="log-stop-btn" class="btn-massive btn-log">
+                    LOG STOP
+                    <span class="tap-hint">Tap when package delivered</span>
+                </button>
+                
+                <button id="end-shift-btn" class="btn-outline">End Shift</button>
+            </div>
+
+        </section>
+        
+        <!-- Break Options (Future Feature Placeholder) -->
+        <div id="break-banner" class="break-banner" style="display: none;">
+            <span>⏸ On Break</span>
+            <button id="end-break-btn" class="btn-small">End Break</button>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
